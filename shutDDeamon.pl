@@ -10,6 +10,9 @@ use warnings;
 #										#
 #################################################################################
 
+my $time2check = 3;
+
+
 print "\nShut Down Deamon is working ......\n\n";
 
 # Assign  PIN P8_15 as  GPIO to check for 12V
@@ -22,10 +25,18 @@ while(1)
 		my $value = `cat /sys/class/gpio/gpio47/value`;
 		if ($value == 0)
 			{
-				print "Shutting down the system ......\n";
-				`sudo shutdown -h now`;
-				select(undef,undef,undef,0.5);
-				exit();
+				print "Lack of power received, will wait and recheck it ......\n";
+				sleep($time2check);
+				# Recheck again 
+				$value = `cat /sys/class/gpio/gpio47/value`;
+				if ($value == 0)
+					{
+						print "Lack of power confirmed, starting shut down procedures......\n";
+						#`sudo shutdown -h now`;
+						
+						select(undef,undef,undef,0.5);
+						exit();
+					}
 
 			}
 		select(undef,undef,undef,0.5);
