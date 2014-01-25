@@ -10,8 +10,7 @@ use warnings;
 #										#
 #################################################################################
 
-my $time2check = 3;
-
+my $numRecheck = 10;
 
 print "\nShut Down Deamon is working ......\n\n";
 
@@ -22,22 +21,28 @@ print "\nShut Down Deamon is working ......\n\n";
 
 while(1)
 	{
+		START:
 		my $value = `cat /sys/class/gpio/gpio47/value`;
 		if ($value == 0)
 			{
-				print "Lack of power received, will wait and recheck it ......\n";
-				sleep($time2check);
+				print "Lack of power noted, will recheck it ......\n";
 				# Recheck again 
-				$value = `cat /sys/class/gpio/gpio47/value`;
-				if ($value == 0)
-					{
-						print "Lack of power confirmed, starting shut down procedures......\n";
-						#`sudo shutdown -h now`;
-						
-						select(undef,undef,undef,0.5);
-						exit();
+				
+				for(my $i = 1; $i <= $numRecheck; $i++)			
+					{	
+						$value = `cat /sys/class/gpio/gpio47/value`;
+						if ($value == 1)
+							{
+								print "Power is back up, startt from the begining\n";
+								goto START;
+							}	
+						select(undef,undef,undef,0.2);			
+						print "Rechecking $i\n";
 					}
-
+				print "Lack of power CONFIRMED, will shut down.....\n";
+				#`sudo shutdown -h now`;
+				select(undef,undef,undef,0.5);
+                                exit();
 			}
 		select(undef,undef,undef,0.5);
 	}
