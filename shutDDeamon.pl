@@ -33,14 +33,14 @@ while(1)
 						$value = `cat /sys/class/gpio/gpio47/value`;
 						if ($value == 1)
 							{
-								print "Power is back up, startt from the begining\n";
+								print "Power is back up, starting from the begining\n";
 								goto START;
 							}	
 						select(undef,undef,undef,0.2);			
 						print "Rechecking $i\n";
 					}
 				print "Lack of power CONFIRMED, will shut down.....\n";
-				#`sudo shutdown -h now`;
+				`sudo shutdown -h now`;
 				select(undef,undef,undef,0.5);
                                 exit();
 			}
